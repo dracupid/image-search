@@ -4,7 +4,7 @@ import threading
 from multiprocessing import Pool
 
 
-class RunnerProcess:
+class MultiThreadProcess:
     def __init__(self, fun, data):
         self.queue_lock = threading.Lock()
         self.data = data
@@ -47,7 +47,7 @@ class ConcurrencyRunner:
             self.split_data.append(data[i * block_size: ((i + 1) * block_size)])
 
     def process_fun(self, data):
-        running = RunnerProcess(self.fun, data)
+        running = MultiThreadProcess(self.fun, data)
         threads = running.get_threads(thread_per_process=self.thread_per_process, start=True)
         for thread in threads:
             thread.join()

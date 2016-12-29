@@ -1,6 +1,7 @@
 import math
 import time
 from abc import ABCMeta, abstractmethod
+from urllib.parse import urlparse
 
 
 class Parser(metaclass=ABCMeta):
@@ -42,7 +43,7 @@ class Parser(metaclass=ABCMeta):
         """
         pass
 
-    def get_images(self, word):
+    def get_images(self, word: str) -> dict:
         """
         图片抓取主函数
         :param word: 关键词
@@ -56,15 +57,18 @@ class Parser(metaclass=ABCMeta):
     # def filter(self):
     #     pass
 
-    def _add_img(self, name, url):
+    def _add_img(self, name: str, url: str):
         """
         向字典中添加图片
         :param name:
         :param url:
         :return:
         """
+        name = name.strip()
+        url = url.strip()
         if url and url not in self.img_dict:
-            suffix = url.split(".")[-1]
+            url_obj = urlparse(url)
+            suffix = url_obj.path.split(".")[-1]
             if len(suffix) > 4:
                 suffix = "jpg"
             name = "%s_%d_%s.%s" % (self.engine_name, self.img_num, name, suffix.lower())

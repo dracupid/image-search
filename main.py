@@ -3,9 +3,9 @@
 import logging
 import os
 import shutil
+import time
 import traceback
 import urllib
-import time
 import urllib.request
 
 import requests
@@ -78,7 +78,7 @@ def download_item(url, file_path, max_retry=1):
     try_time = 0
     skip_retry = False
 
-    result = (True, )
+    result = (True,)
 
     while try_time < max_retry:
         if try_time > 0:
@@ -89,14 +89,14 @@ def download_item(url, file_path, max_retry=1):
             _download_image(url, file_path)  # 保存图片
         except requests.exceptions.RequestException as e:
             is_error = True
-            logger.error('failed to fetch %s %s', url, e)
+            logger.error('failed to fetch %s\n\t%s', url, e)
         except urllib3_exceptions.ReadTimeoutError:
             is_error = True
             skip_retry = True
             logger.error('timeout to fetch %s', url)
         except urllib3_exceptions.ProtocolError as e:
             is_error = True
-            logger.error('failed to fetch %s %s', url, e)
+            logger.error('failed to fetch %s\n\t%s', url, e)
         except:
             is_error = True
             skip_retry = True
@@ -117,9 +117,24 @@ def download_item(url, file_path, max_retry=1):
                 break
     return result
 
+
 def download_item_process(item):
     (url, file_path) = item
     return download_item(url, file_path)
+
+
+def parse_search_page(driver: webdriver.Remote, word: str, engine: str, size_type: str = None) -> dict:
+    logger = logging.getLogger("crawler:parser")
+    if engine not in support_engines:
+        logger.error("engine %s is not supported", engine)
+        return {}
+
+    parser = support_engines[engine](driver)
+    if size_type is not None:
+        parser.set_size_filter(size_type)
+    img_dict = parser.get_images(word)
+    logging.info("%s find %s photos" % (engine, parser.img_num))
+    return img_dict
 
 
 def download_by_word(word, output_dir="./output", engines=('baidu',), concurrency=True, size_type=None):
@@ -140,6 +155,7 @@ def download_by_word(word, output_dir="./output", engines=('baidu',), concurrenc
     https://github.com/SeleniumHQ/selenium/wiki/ChromeDriver
     """
     driver = webdriver.Chrome(CHROME_DRIVER)
+
     # 最大化窗口，因为每一次爬取只能看到视窗内的图片
     driver.maximize_window()
 
@@ -149,17 +165,7 @@ def download_by_word(word, output_dir="./output", engines=('baidu',), concurrenc
     os.makedirs(output_dir, exist_ok=True)  # 确保文件夹存在
 
     for engine in engines:
-        if engine not in support_engines:
-            logging.error("engine %s is not supported", engine)
-            continue
-
-        parser = support_engines[engine](driver)
-        if size_type is not None:
-            parser.set_size_filter(size_type)
-        img_dict = parser.get_images(word)
-
-        logging.info("%s find %s photos" % (engine, len(img_dict)))
-
+        img_dict = parse_search_page(driver, word, engine, size_type)
         img_items += img_dict.items()
 
     img_items = list(map(lambda item: (item[0], os.path.join(output_dir, item[1])), img_items))
@@ -170,3 +176,4 @@ def download_by_word(word, output_dir="./output", engines=('baidu',), concurrenc
     else:
         for url, file_path in img_items:
             download_item(url, file_path)
+
