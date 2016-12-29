@@ -33,7 +33,7 @@ class CrawlerDriver:
         if not reopen and self._driver is not None:
             return
         this_path = os.path.abspath(os.path.dirname(__file__))  # 本文件路径
-        chrome_driver_path = os.path.join(this_path, 'driver/chromedriver')
+        chrome_driver_path = os.path.join(this_path, '../driver/chromedriver')
 
         """
         配置Chrome driver (use 2.27)

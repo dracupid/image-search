@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+# 已废弃
 import logging
 import os
 import shutil

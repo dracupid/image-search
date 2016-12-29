@@ -1,7 +1,6 @@
 import math
 import time
 from abc import ABCMeta, abstractmethod
-from urllib.parse import urlparse
 
 
 class Parser(metaclass=ABCMeta):
@@ -64,14 +63,10 @@ class Parser(metaclass=ABCMeta):
         :param url:
         :return:
         """
-        name = name.strip()
+        name = name.strip().strip("_. ")
         url = url.strip()
         if url and url not in self.img_dict:
-            url_obj = urlparse(url)
-            suffix = url_obj.path.split(".")[-1]
-            if len(suffix) > 4:
-                suffix = "jpg"
-            name = "%s_%d_%s.%s" % (self.engine_name, self.img_num, name, suffix.lower())
+            name = "%s_%d_%s" % (self.engine_name, self.img_num, name)
             name = name.replace("/", "_").replace(" ", "_")
             self.img_num += 1
             self.img_dict[url] = name
