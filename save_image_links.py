@@ -7,7 +7,7 @@ from lib.CrawlerDriver import CrawlerDriver
 from parsers import Parser
 
 # ---------
-engine = "bing"
+engine = "google"
 word = "化验单"
 # ---------
 

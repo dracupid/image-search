@@ -24,11 +24,15 @@ class So360Parser(Parser):
 
     def _parse(self):
         # interval = 0.2
-        self.load_all_by_scroll(interval=0.1, repeat_threshold=10, load_more_btn_class="btn_loadmore")
+        def cb():
+            for element in self.driver.find_elements_by_xpath(self.xpath):
+                img_ele = element.find_element_by_xpath(".//a/img")
+                if img_ele is None:
+                    continue
+                img_url = parse.unquote(img_ele.get_attribute('data-originalsrc'))
+                name = element.find_element_by_xpath('.//a[@class="img_link"]').get_attribute('title')
+                print(img_url + " -> " + name)
+                self._add_img(name, img_url)
 
-        for element in self.driver.find_elements_by_xpath(self.xpath):
-            print(element.text)
-            img_url = parse.unquote(element.find_element_by_xpath(".//a/img").get_attribute('data-originalsrc'))
-            name = element.find_element_by_xpath('.//a[@class="img_link"]').get_attribute('title')
-            print(img_url + " -> " + name)
-            self._add_img(name, img_url)
+        self.load_all_by_scroll(interval=0.1, repeat_threshold=10, load_more_btn_class="btn_loadmore", cb=cb,
+                                step=self.window_height * 0.6)

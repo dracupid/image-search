@@ -23,7 +23,8 @@ class Parser(metaclass=ABCMeta):
         打开搜索引擎URL
         :param word: 关键词
         """
-        url = self.url_pattern % (word,)
+        print(self.url_pattern)
+        url = self.url_pattern % word
         # 浏览器打开要爬取的页面
         self.driver.get(url)
 
@@ -72,7 +73,7 @@ class Parser(metaclass=ABCMeta):
             self.img_dict[url] = name
             # print("ADD: " + name + " -> ", url)
 
-    def load_all_by_scroll(self, interval=0, repeat_threshold=15, step=-1, load_more_btn_class=None):
+    def load_all_by_scroll(self, interval=0, repeat_threshold=15, step=-1, load_more_btn_class=None, cb = None):
         """
         滑动页面到底部
         """
@@ -104,6 +105,8 @@ class Parser(metaclass=ABCMeta):
             if cur_pos == last_pos:  # 页面未能向下滑动
                 repeat_time += 1
             else:
+                if cb is not None:
+                    cb()
                 repeat_time = 0
                 pos += step  # 每次下滚500px
 
